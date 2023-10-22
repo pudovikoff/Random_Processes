@@ -33,6 +33,9 @@ class LinearGaussianSystem:
         self.b_r = []
         self.est_x_r_list = []
         self.est_cov_r_list = []
+        
+        self.smooth_x_list = []
+        self.smooth_cov_list = []
 
     def __calculate__reversed_coef__(self):
         for i in range(len(self.k_t)-1):
@@ -134,8 +137,17 @@ class LinearGaussianSystem:
                 self.est_x_r_list.append(X_hat)
                 self.est_cov_r_list.append(k)
 
-
+        self.est_x_r_list.reverse()
         return self.est_x_r_list
     
-    def smooting(self):
-        return 1
+    def smoothing(self):
+        if not len(self.est_x_r_list):
+            raise Exception('You have not make reverse estimation')
+        k = np.array(self.est_cov_list)
+        k_k = np.array(self.est_cov_list)
+        k_kr = np.array(self.est_cov_r_list)
+        self.smooth_cov_list  = (k_k ** (-1) + k_kr ** (-1) - k**(-1)) ** -1
+        self.smooth_x_list = self.smooth_cov_list * (k_k ** (-1) * self.est_x_list + k_kr ** (-1) * self.est_x_r_list )
+
+        return self.smooth_x_list
+        

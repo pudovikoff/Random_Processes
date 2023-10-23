@@ -5,6 +5,7 @@ import scipy.stats as ss
 import math
 from tqdm.notebook import tqdm
 import seaborn as sns
+from classes.LinearSystem import LinearSystem
 
 class Woman:
     def __init__(self, days = 365, P = np.array([[0.7, 0.3],[0.4, 0.6]]),
@@ -104,4 +105,23 @@ class Woman:
         if ret:
             return df
 
+    def linear_estimation(self):
+        eps = 1e-10
+        a, b, c = self.P.T, eps * np.ones(self.P.shape[0]), np.zeros(self.P.shape[0])
+        A, B, C = self.p_action.T, eps * np.ones(self.p_action.shape[1]), np.zeros(self.p_action.shape[1])
+        LS = LinearSystem(a, b, c, A, B, C)
+        
+        X = np.zeros((len(self.weather), self.P.shape[0]))
+        for i in range(len(self.weather)):
+            X[i][self.weather[i]] = 1
+        X += eps * ss.norm.rvs(size = X.shape)
 
+        y = np.zeros((len(self.actions), self.p_action.shape[1]))
+        for i in range(len(self.actions)):
+            y[i][self.actions[i]] = 1
+        y += eps * ss.norm.rvs(size = y.shape)
+
+        LS.fit(X, y, self.p0, np.diag(np.ones(self.P.shape[0])))
+        res = LS.estimate_x()
+        res /= np.sum(res, axis=1, keepdims=1)
+        return res

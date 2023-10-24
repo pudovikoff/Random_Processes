@@ -38,7 +38,7 @@ class LinearSystem:
         def estimate_x(self):
             self.est_x_list = []
             self.est_cov_list = []
-            for i in tqdm(range(self.x_list.shape[0])):
+            for i in (range(self.x_list.shape[0])):
                 if i == 0:
                     # start
                     X_hat = self.m0 + self.D_0 @ self.A.T @ np.linalg.pinv((self.A @ self.D_0 @ self.A.T + self.B @ self.B.T)) @ (self.y_list[0] - self.A @ self.m0 - self.C)
